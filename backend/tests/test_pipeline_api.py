@@ -1,0 +1,166 @@
+"""API regression tests for PolicyFlow graph validation/export/run flows."""
+
+import json
+import os
+from pathlib import Path
+
+import pytest
+import requests
+
+
+def _read_frontend_backend_url() -> str:
+    env_value = os.environ.get("REACT_APP_BACKEND_URL")
+    if env_value:
+        return env_value.strip()
+
+    env_file = Path("/app/frontend/.env")
+    if not env_file.exists():
+        raise RuntimeError("frontend/.env not found and REACT_APP_BACKEND_URL is missing")
+
+    for line in env_file.read_text().splitlines():
+        if line.startswith("REACT_APP_BACKEND_URL="):
+            return line.split("=", 1)[1].strip()
+
+    raise RuntimeError("REACT_APP_BACKEND_URL is required")
+
+
+def _build_base_url() -> str:
+    api_base = _read_frontend_backend_url().rstrip("/")
+    if api_base.startswith("/"):
+        frontend_origin = os.environ.get("FRONTEND_ORIGIN", "http://127.0.0.1:3000").rstrip("/")
+        return f"{frontend_origin}{api_base}"
+    return api_base
+
+
+BASE_URL = _build_base_url()
+
+
+@pytest.fixture(scope="session")
+def api_client() -> requests.Session:
+    # Shared HTTP session for backend API checks through the configured frontend/backend URL.
+    session = requests.Session()
+    session.headers.update({"Content-Type": "application/json"})
+    return session
+
+
+@pytest.fixture(scope="session")
+def sample_graph_payload() -> dict:
+    # Reusable graph fixture mirroring the shipped sample graph.
+    fixture_path = Path("/app/tests/fixtures/sample_graph.json")
+    return json.loads(fixture_path.read_text())
+
+
+class TestCoreApiRoutes:
+    # Health and catalog endpoints for workspace bootstrapping.
+    def test_health_endpoint(self, api_client: requests.Session) -> None:
+        response = api_client.get(f"{BASE_URL}/health", timeout=30)
+        assert response.status_code == 200
+
+        payload = response.json()
+        assert payload["status"] == "ok"
+        assert payload["service"] == "policyflow-backend"
+
+    def test_node_catalog_endpoint(self, api_client: requests.Session) -> None:
+        response = api_client.get(f"{BASE_URL}/node-catalog", timeout=30)
+        assert response.status_code == 200
+
+        payload = response.json()
+        assert isinstance(payload.get("groups"), list)
+        assert len(payload["groups"]) >= 4
+        assert any(group.get("key") == "training" for group in payload["groups"])
+
+
+class TestGraphPipelineEndpoints:
+    # DAG validation and execution order checks.
+    def test_validate_graph_returns_execution_order(
+        self,
+        api_client: requests.Session,
+        sample_graph_payload: dict,
+    ) -> None:
+        response = api_client.post(f"{BASE_URL}/graphs/validate", json=sample_graph_payload, timeout=30)
+        assert response.status_code == 200
+
+        payload = response.json()
+        assert isinstance(payload.get("execution_order"), list)
+        assert len(payload["execution_order"]) == len(sample_graph_payload["nodes"])
+        assert payload["execution_order"][0]["id"] == "node-dataset-1"
+        assert payload["execution_order"][-1]["id"] == "node-ppo-1"
+
+    def test_validate_graph_rejects_cycle(self, api_client: requests.Session, sample_graph_payload: dict) -> None:
+        cycle_payload = json.loads(json.dumps(sample_graph_payload))
+        cycle_payload["edges"].append(
+            {
+                "id": "edge-cycle-1",
+                "source": "node-ppo-1",
+                "target": "node-dataset-1",
+            }
+        )
+
+        response = api_client.post(f"{BASE_URL}/graphs/validate", json=cycle_payload, timeout=30)
+        assert response.status_code == 400
+
+        payload = response.json()
+        assert "cycle" in payload["detail"].lower() or "dag" in payload["detail"].lower()
+
+    # Readable Python export checks.
+    def test_export_returns_script(self, api_client: requests.Session, sample_graph_payload: dict) -> None:
+        response = api_client.post(f"{BASE_URL}/export", json=sample_graph_payload, timeout=30)
+        assert response.status_code == 200
+
+        payload = response.json()
+        assert "script" in payload
+        assert "config" in payload
+        assert isinstance(payload["script"], str)
+        assert "def main()" in payload["script"]
+        assert "graph_config" in payload["script"]
+        assert payload["config"]["node_count"] == len(sample_graph_payload["nodes"])
+
+    # Run trigger checks with execution mode contract.
+    def test_run_returns_mode_and_script(self, api_client: requests.Session, sample_graph_payload: dict) -> None:
+        response = api_client.post(f"{BASE_URL}/run", json=sample_graph_payload, timeout=30)
+        assert response.status_code == 200
+
+        payload = response.json()
+        assert payload["mode"] == "validation-dry-run"
+        assert isinstance(payload.get("execution_order"), list)
+        assert len(payload["execution_order"]) == len(sample_graph_payload["nodes"])
+        assert "Auto-generated by PolicyFlow" in payload["script"]
+
+    def test_run_returns_lightweight_mode_with_classical_node(
+        self,
+        api_client: requests.Session,
+        sample_graph_payload: dict,
+    ) -> None:
+        classical_payload = json.loads(json.dumps(sample_graph_payload))
+        classical_payload["nodes"].append(
+            {
+                "id": "node-classical-2",
+                "type": "classical",
+                "position": {"x": 510, "y": 300},
+                "data": {
+                    "label": "Classical ML Block",
+                    "subtitle": "Tabular baseline",
+                    "badge": "ml",
+                    "params": {
+                        "algorithm": "random_forest",
+                        "library": "scikit-learn",
+                        "objective": "classification",
+                        "metric": "accuracy",
+                    },
+                },
+            }
+        )
+        classical_payload["edges"].append(
+            {
+                "id": "edge-classical-1",
+                "source": "node-dataset-1",
+                "target": "node-classical-2",
+            }
+        )
+
+        response = api_client.post(f"{BASE_URL}/run", json=classical_payload, timeout=30)
+        assert response.status_code == 200
+
+        payload = response.json()
+        assert payload["mode"] == "lightweight-local"
+        assert any(step["id"] == "node-classical-2" for step in payload["execution_order"])

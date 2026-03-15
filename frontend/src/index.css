@@ -1,0 +1,80 @@
+@import 'tailwindcss';
+
+:root {
+  color-scheme: dark;
+  font-family: 'Inter', sans-serif;
+  background:
+    radial-gradient(circle at top left, rgba(14, 165, 233, 0.12), transparent 24%),
+    radial-gradient(circle at bottom right, rgba(168, 85, 247, 0.12), transparent 20%),
+    #09090b;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+  margin: 0;
+}
+
+body {
+  background: transparent;
+  color: #fafafa;
+  overflow-x: hidden;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+::selection {
+  background: rgba(59, 130, 246, 0.35);
+  color: #fff;
+}
+
+.font-mono-ui {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.grid-shell {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.panel-shell {
+  background: rgba(9, 9, 11, 0.86);
+  border: 1px solid rgba(63, 63, 70, 0.92);
+  box-shadow: 0 14px 48px rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(12px);
+}
+
+.hud-pill {
+  border: 1px solid rgba(82, 82, 91, 0.9);
+  background: rgba(24, 24, 27, 0.9);
+}
+
+.react-flow__panel {
+  margin: 16px;
+}
+
+.react-flow__attribution {
+  display: none;
+}
+
+.react-flow__node {
+  background: transparent;
+}
+
+.react-flow__handle {
+  width: 12px;
+  height: 12px;
+  border: 2px solid #09090b;
+}

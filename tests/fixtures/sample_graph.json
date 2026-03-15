@@ -1,0 +1,57 @@
+{
+  "client_id": "demo-client",
+  "nodes": [
+    {
+      "id": "node-dataset-1",
+      "type": "dataset",
+      "position": { "x": 80, "y": 150 },
+      "data": {
+        "label": "Hugging Face Dataset",
+        "subtitle": "Hub-native datasets for SFT, DPO, reward modeling, and eval.",
+        "badge": "dataset",
+        "params": {
+          "sourceType": "huggingface",
+          "datasetName": "trl-internal-testing/hh-rlhf-helpful-base-trl-style",
+          "format": "json",
+          "split": "train"
+        }
+      }
+    },
+    {
+      "id": "node-model-1",
+      "type": "model",
+      "position": { "x": 400, "y": 110 },
+      "data": {
+        "label": "Base LLM Loader",
+        "subtitle": "Use HF ids, local checkpoints, quantized adapters, or fused LoRA stacks.",
+        "badge": "llm",
+        "params": {
+          "modelId": "meta-llama/Llama-3.2-1B",
+          "runtime": "transformers",
+          "precision": "bf16",
+          "deviceMap": "auto"
+        }
+      }
+    },
+    {
+      "id": "node-ppo-1",
+      "type": "training",
+      "position": { "x": 720, "y": 90 },
+      "data": {
+        "label": "PPO / RLHF Trainer",
+        "subtitle": "Streams reward, KL penalty, and loss metrics back over WebSockets.",
+        "badge": "rlhf",
+        "params": {
+          "strategy": "ppo",
+          "library": "trl",
+          "epochs": "2",
+          "learningRate": "0.00001"
+        }
+      }
+    }
+  ],
+  "edges": [
+    { "id": "edge-1", "source": "node-dataset-1", "target": "node-model-1" },
+    { "id": "edge-2", "source": "node-model-1", "target": "node-ppo-1" }
+  ]
+}

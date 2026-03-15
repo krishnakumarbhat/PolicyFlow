@@ -1,0 +1,12 @@
+datasets
+transformers
+trl
+peft
+accelerate
+xgboost
+lightgbm
+catboost
+tensorflow
+keras
+unsloth
+bitsandbytes
