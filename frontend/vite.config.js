@@ -4,10 +4,18 @@ import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
+  const allowedHosts = [
+    'train-graph.cluster-0.preview.emergentcf.cloud',
+    '.preview.emergentcf.cloud',
+    '.preview.emergentagent.com',
+    'localhost',
+    '127.0.0.1',
+  ];
 
   return {
     plugins: [react(), tailwindcss()],
     server: {
+      allowedHosts,
       host: '0.0.0.0',
       port: 3000,
       proxy: {
@@ -19,6 +27,7 @@ export default defineConfig(({ mode }) => {
       },
     },
     preview: {
+      allowedHosts,
       host: '0.0.0.0',
       port: 3000,
     },
