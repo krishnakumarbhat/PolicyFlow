@@ -1,0 +1,115 @@
+{
+  "project_name": "ML Forge - Visual LLM Pipeline Editor",
+  "design_system": {
+    "theme": {
+      "mode": "dark",
+      "radius": "0.5rem",
+      "colors": {
+        "background": "#09090b",
+        "foreground": "#fafafa",
+        "card": "#18181b",
+        "card_foreground": "#fafafa",
+        "popover": "#18181b",
+        "popover_foreground": "#fafafa",
+        "primary": "#3b82f6",
+        "primary_foreground": "#ffffff",
+        "secondary": "#27272a",
+        "secondary_foreground": "#fafafa",
+        "muted": "#27272a",
+        "muted_foreground": "#a1a1aa",
+        "accent": "#27272a",
+        "accent_foreground": "#fafafa",
+        "destructive": "#ef4444",
+        "destructive_foreground": "#fafafa",
+        "border": "#27272a",
+        "input": "#27272a",
+        "ring": "#3b82f6"
+      }
+    },
+    "typography": {
+      "font_family_heading": "JetBrains Mono, monospace",
+      "font_family_body": "Inter, sans-serif",
+      "font_family_code": "JetBrains Mono, monospace",
+      "headings": {
+        "h1": "text-4xl font-bold tracking-tight",
+        "h2": "text-3xl font-semibold tracking-tight",
+        "h3": "text-2xl font-semibold tracking-tight"
+      },
+      "body": {
+        "base": "text-sm leading-relaxed",
+        "small": "text-xs font-medium text-muted-foreground"
+      }
+    },
+    "layout": {
+      "grid_system": "Use CSS Grid for the main layout: Sidebar (250px), Canvas (1fr), Properties (300px)",
+      "spacing": "Generous spacing in panels (p-4, p-6), tight spacing in nodes (p-2, gap-2)",
+      "container_width": "max-w-7xl mx-auto"
+    },
+    "components": {
+      "buttons": {
+        "primary": "bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm",
+        "secondary": "bg-secondary text-secondary-foreground hover:bg-secondary/80",
+        "ghost": "hover:bg-accent hover:text-accent-foreground",
+        "outline": "border border-input bg-background hover:bg-accent hover:text-accent-foreground"
+      },
+      "nodes": {
+        "base": "bg-card border border-border rounded-lg shadow-md min-w-[250px]",
+        "header": "px-4 py-2 border-b border-border font-mono text-xs font-bold uppercase tracking-wider flex items-center justify-between",
+        "body": "p-4 space-y-3",
+        "handle": "w-3 h-3 bg-muted-foreground border-2 border-background"
+      },
+      "panels": {
+        "sidebar": "bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-r border-border h-full flex flex-col",
+        "properties": "bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-l border-border h-full overflow-y-auto"
+      }
+    },
+    "visual_enhancers": {
+      "shadows": "shadow-lg shadow-black/20",
+      "borders": "1px solid var(--border)",
+      "glassmorphism": "backdrop-blur-md bg-black/40",
+      "animations": "transition-all duration-200 ease-in-out"
+    },
+    "node_categories": {
+      "data": { "color": "#0ea5e9", "icon": "Database" },
+      "model": { "color": "#22c55e", "icon": "Box" },
+      "training": { "color": "#a855f7", "icon": "Zap" },
+      "evaluation": { "color": "#f97316", "icon": "BarChart" }
+    }
+  },
+  "asset_requirements": {
+    "icons": [
+      "Lucide React (default)",
+      "Database",
+      "Box", 
+      "Zap",
+      "BarChart",
+      "Play",
+      "Save",
+      "Code",
+      "Settings",
+      "X",
+      "Plus",
+      "Trash"
+    ],
+    "images": []
+  },
+  "instructions_to_main_agent": [
+    "1. INITIAL SETUP: Create the directory structure first. Ensure 'frontend' and 'backend' are at the root level.",
+    "2. FRONTEND: Initialize a React app with Vite. Install 'reactflow', 'lucide-react', 'clsx', 'tailwind-merge', 'framer-motion'.",
+    "3. TAILWIND: Configure tailwind.config.js with the colors specified in the design system.",
+    "4. COMPONENTS: Create a 'CustomNode' component that wraps the node logic. It should accept 'data' (label, inputs, controls) and render the appropriate Shadcn UI components (Input, Select, Slider) inside.",
+    "5. BACKEND: Set up FastAPI with a '/run' endpoint that accepts the JSON graph. Create a 'GraphParser' class that topologically sorts the nodes and executes them.",
+    "6. EXECUTION: The backend should use 'transformers', 'peft', and 'trl' to generate the Python code. Implement a 'CodeGenerator' class.",
+    "7. WEBSOCKETS: Implement a WebSocket endpoint '/ws/{client_id}' for streaming logs.",
+    "8. NODE TYPES: Implement at least: 'DatasetNode' (file path input), 'ModelNode' (model ID input), 'TrainingNode' (hyperparams).",
+    "9. EXPORT: Add a button in the UI to 'Export Python Code' which calls the backend to generate the script.",
+    "CRITICAL: Ensure the UI is dense and professional. Use 'JetBrains Mono' for all data-related text."
+  ],
+  "universal_guidelines": [
+    "Dark mode is mandatory.",
+    "Use distinct colors for different node types (Data, Model, Training).",
+    "Ensure high contrast for text (WCAG AA).",
+    "All interactive elements must have hover states.",
+    "Use 'sonner' for toast notifications."
+  ]
+}
