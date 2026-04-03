@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-cd /app/frontend
-yarn build
+PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 
-mkdir -p /app/backend/static
-rm -rf /app/backend/static/*
-cp -R /app/frontend/dist/. /app/backend/static/
+cd "$PROJECT_ROOT/frontend"
+npm run build
+
+mkdir -p "$PROJECT_ROOT/backend/static"
+rm -rf "$PROJECT_ROOT/backend/static"/*
+cp -R "$PROJECT_ROOT/frontend/dist/." "$PROJECT_ROOT/backend/static/"
 
 printf 'Frontend build copied to backend/static\n'

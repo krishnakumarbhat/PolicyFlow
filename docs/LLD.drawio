@@ -1,0 +1,68 @@
+<mxfile host="app.diagrams.net" modified="2026-04-01T00:00:00.000Z" agent="PolicyFlow" version="24.0.0" type="device">
+  <diagram name="LLD" id="lld-1">
+    <mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <!-- Title -->
+        <mxCell id="title" value="PolicyFlow — Low-Level Design" style="text;html=1;fontSize=20;fontStyle=1;align=center;" vertex="1" parent="1">
+          <mxGeometry x="400" y="10" width="500" height="40" as="geometry"/>
+        </mxCell>
+
+        <!-- Schemas Layer -->
+        <mxCell id="layer_schema" value="Schemas (01-03)" style="swimlane;startSize=30;fillColor=#f5f5f5;strokeColor=#666666;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="70" width="380" height="240" as="geometry"/>
+        </mxCell>
+        <mxCell id="gn" value="GraphNode&#xa;─────────&#xa;+ id: str&#xa;+ type: str&#xa;+ position: dict&#xa;+ data: dict" style="rounded=0;whiteSpace=wrap;fillColor=#dae8fc;strokeColor=#6c8ebf;align=left;fontSize=11;" vertex="1" parent="layer_schema">
+          <mxGeometry x="20" y="40" width="160" height="100" as="geometry"/>
+        </mxCell>
+        <mxCell id="ge" value="GraphEdge&#xa;─────────&#xa;+ id: str&#xa;+ source: str&#xa;+ target: str" style="rounded=0;whiteSpace=wrap;fillColor=#dae8fc;strokeColor=#6c8ebf;align=left;fontSize=11;" vertex="1" parent="layer_schema">
+          <mxGeometry x="200" y="40" width="160" height="100" as="geometry"/>
+        </mxCell>
+        <mxCell id="gp" value="GraphPayload&#xa;─────────&#xa;+ client_id: str?&#xa;+ nodes: list[GraphNode]&#xa;+ edges: list[GraphEdge]" style="rounded=0;whiteSpace=wrap;fillColor=#dae8fc;strokeColor=#6c8ebf;align=left;fontSize=11;" vertex="1" parent="layer_schema">
+          <mxGeometry x="100" y="160" width="180" height="70" as="geometry"/>
+        </mxCell>
+
+        <!-- Services Layer -->
+        <mxCell id="layer_svc" value="Services (04-05)" style="swimlane;startSize=30;fillColor=#f5f5f5;strokeColor=#666666;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="460" y="70" width="400" height="240" as="geometry"/>
+        </mxCell>
+        <mxCell id="nr" value="NodeRegistry «Singleton»&#xa;─────────&#xa;- _instance: NodeRegistry&#xa;- _catalog: dict&#xa;+ get_catalog(): dict" style="rounded=0;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;align=left;fontSize=11;" vertex="1" parent="layer_svc">
+          <mxGeometry x="20" y="40" width="180" height="90" as="geometry"/>
+        </mxCell>
+        <mxCell id="wm" value="WebSocketManager «Observer»&#xa;─────────&#xa;- _connections: dict&#xa;+ connect(id, ws)&#xa;+ disconnect(id, ws)&#xa;+ send_json(id, payload)" style="rounded=0;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;align=left;fontSize=11;" vertex="1" parent="layer_svc">
+          <mxGeometry x="210" y="40" width="180" height="110" as="geometry"/>
+        </mxCell>
+
+        <!-- Engine Layer -->
+        <mxCell id="layer_eng" value="Engine (06-08)" style="swimlane;startSize=30;fillColor=#f5f5f5;strokeColor=#666666;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="350" width="820" height="200" as="geometry"/>
+        </mxCell>
+        <mxCell id="gpar" value="GraphParser&#xa;─────────&#xa;+ topological_sort(payload): list&#xa;+ describe_execution(payload): list[dict]&#xa;─────────&#xa;Kahn's algorithm O(V+E)" style="rounded=0;whiteSpace=wrap;fillColor=#e1d5e7;strokeColor=#9673a6;align=left;fontSize=11;" vertex="1" parent="layer_eng">
+          <mxGeometry x="20" y="40" width="240" height="110" as="geometry"/>
+        </mxCell>
+        <mxCell id="cg" value="CodeGenerator «Factory»&#xa;─────────&#xa;+ generate(payload, order): dict&#xa;- _render_dataset(node)&#xa;- _render_model(node)&#xa;- _render_training(node)&#xa;- _render_classical(node)&#xa;- _render_output(node)" style="rounded=0;whiteSpace=wrap;fillColor=#e1d5e7;strokeColor=#9673a6;align=left;fontSize=11;" vertex="1" parent="layer_eng">
+          <mxGeometry x="290" y="40" width="240" height="140" as="geometry"/>
+        </mxCell>
+        <mxCell id="ee" value="ExecutionEngine «Strategy»&#xa;─────────&#xa;+ select_mode(payload): str&#xa;+ execute(payload, ws_mgr)&#xa;- _strategy_llm_dry()&#xa;- _strategy_classical()&#xa;- _build_classical_model()" style="rounded=0;whiteSpace=wrap;fillColor=#e1d5e7;strokeColor=#9673a6;align=left;fontSize=11;" vertex="1" parent="layer_eng">
+          <mxGeometry x="560" y="40" width="240" height="130" as="geometry"/>
+        </mxCell>
+
+        <!-- Routes -->
+        <mxCell id="routes" value="09_routes — register_routes(app)&#xa;/api/health · /api/node-catalog · /api/graphs/validate&#xa;/api/export · /api/run · /api/ws/{client_id}" style="rounded=1;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;align=center;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="200" y="590" width="500" height="60" as="geometry"/>
+        </mxCell>
+
+        <!-- App Factory -->
+        <mxCell id="factory" value="00_app_factory — create_app()&#xa;FastAPI + CORS + Static Mount" style="rounded=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;align=center;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="250" y="690" width="400" height="50" as="geometry"/>
+        </mxCell>
+
+        <!-- Arrows -->
+        <mxCell id="a1" edge="1" source="factory" target="routes" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

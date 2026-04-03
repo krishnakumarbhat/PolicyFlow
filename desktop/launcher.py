@@ -1,3 +1,4 @@
+import importlib
 import os
 import socket
 import sys
@@ -22,7 +23,8 @@ FRONTEND_DIST = ROOT_DIR / "frontend" / "dist"
 sys.path.insert(0, str(BACKEND_DIR))
 os.environ.setdefault("POLICYFLOW_STATIC_DIR", str(FRONTEND_DIST))
 
-from server import app  # noqa: E402
+_factory = importlib.import_module("src.00_app_factory")
+app = _factory.create_app()
 
 
 def find_free_port() -> int:

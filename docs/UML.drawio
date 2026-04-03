@@ -1,0 +1,74 @@
+<mxfile host="app.diagrams.net" modified="2026-04-01T00:00:00.000Z" agent="PolicyFlow" version="24.0.0" type="device">
+  <diagram name="UML Class Diagram" id="uml-1">
+    <mxGraphModel dx="1400" dy="1000" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="1000" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="title" value="PolicyFlow — UML Class Diagram" style="text;html=1;fontSize=20;fontStyle=1;align=center;" vertex="1" parent="1">
+          <mxGeometry x="400" y="10" width="500" height="40" as="geometry"/>
+        </mxCell>
+
+        <!-- GraphNode -->
+        <mxCell id="c_gn" value="&lt;b&gt;GraphNode&lt;/b&gt;&#xa;«Pydantic BaseModel»&#xa;─────────&#xa;+ id : str&#xa;+ type : str&#xa;+ position : dict[str, float]&#xa;+ data : dict[str, Any]" style="shape=note;whiteSpace=wrap;size=15;align=left;fontSize=11;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="60" y="70" width="200" height="130" as="geometry"/>
+        </mxCell>
+
+        <!-- GraphEdge -->
+        <mxCell id="c_ge" value="&lt;b&gt;GraphEdge&lt;/b&gt;&#xa;«Pydantic BaseModel»&#xa;─────────&#xa;+ id : str&#xa;+ source : str&#xa;+ target : str&#xa;+ sourceHandle : str | None&#xa;+ targetHandle : str | None" style="shape=note;whiteSpace=wrap;size=15;align=left;fontSize=11;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="300" y="70" width="210" height="150" as="geometry"/>
+        </mxCell>
+
+        <!-- GraphPayload -->
+        <mxCell id="c_gp" value="&lt;b&gt;GraphPayload&lt;/b&gt;&#xa;«Pydantic BaseModel»&#xa;─────────&#xa;+ client_id : str | None&#xa;+ nodes : list[GraphNode]&#xa;+ edges : list[GraphEdge]" style="shape=note;whiteSpace=wrap;size=15;align=left;fontSize=11;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="160" y="260" width="220" height="120" as="geometry"/>
+        </mxCell>
+
+        <!-- NodeRegistry -->
+        <mxCell id="c_nr" value="&lt;b&gt;NodeRegistry&lt;/b&gt;&#xa;«Singleton»&#xa;─────────&#xa;- _instance : NodeRegistry&#xa;- _catalog : dict&#xa;─────────&#xa;+ __new__() → NodeRegistry&#xa;+ get_catalog() → dict" style="shape=note;whiteSpace=wrap;size=15;align=left;fontSize=11;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="600" y="70" width="220" height="150" as="geometry"/>
+        </mxCell>
+
+        <!-- WebSocketManager -->
+        <mxCell id="c_wm" value="&lt;b&gt;WebSocketManager&lt;/b&gt;&#xa;«Observer»&#xa;─────────&#xa;- _connections : dict[str, list[WS]]&#xa;─────────&#xa;+ connect(client_id, ws)&#xa;+ disconnect(client_id, ws)&#xa;+ send_json(client_id, payload)" style="shape=note;whiteSpace=wrap;size=15;align=left;fontSize=11;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="870" y="70" width="250" height="160" as="geometry"/>
+        </mxCell>
+
+        <!-- GraphParser -->
+        <mxCell id="c_gpar" value="&lt;b&gt;GraphParser&lt;/b&gt;&#xa;─────────&#xa;+ topological_sort(payload) → list&#xa;+ describe_execution(payload) → list[dict]" style="shape=note;whiteSpace=wrap;size=15;align=left;fontSize=11;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="60" y="440" width="280" height="100" as="geometry"/>
+        </mxCell>
+
+        <!-- CodeGenerator -->
+        <mxCell id="c_cg" value="&lt;b&gt;CodeGenerator&lt;/b&gt;&#xa;«Factory»&#xa;─────────&#xa;- _RENDERERS : dict[str, str]&#xa;─────────&#xa;+ generate(payload, order) → dict&#xa;- _render_dataset(node)&#xa;- _render_model(node)&#xa;- _render_training(node)&#xa;- _render_classical(node)&#xa;- _render_output(node)&#xa;- _safe_name(value) → str" style="shape=note;whiteSpace=wrap;size=15;align=left;fontSize=11;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="400" y="400" width="260" height="200" as="geometry"/>
+        </mxCell>
+
+        <!-- ExecutionEngine -->
+        <mxCell id="c_ee" value="&lt;b&gt;ExecutionEngine&lt;/b&gt;&#xa;«Strategy»&#xa;─────────&#xa;- _parser : GraphParser&#xa;─────────&#xa;+ select_mode(payload) → str&#xa;+ execute(payload, ws_mgr)&#xa;- _strategy_llm_dry()&#xa;- _strategy_classical()&#xa;- _build_classical_model()" style="shape=note;whiteSpace=wrap;size=15;align=left;fontSize=11;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="720" y="400" width="250" height="190" as="geometry"/>
+        </mxCell>
+
+        <!-- Composition arrows -->
+        <mxCell id="r1" style="endArrow=diamond;endFill=1;" edge="1" source="c_gn" target="c_gp" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="r2" style="endArrow=diamond;endFill=1;" edge="1" source="c_ge" target="c_gp" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <!-- Dependency arrows -->
+        <mxCell id="r3" style="dashed=1;endArrow=open;" edge="1" source="c_ee" target="c_gpar" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="r4" style="dashed=1;endArrow=open;" edge="1" source="c_ee" target="c_wm" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="r5" style="dashed=1;endArrow=open;" edge="1" source="c_gpar" target="c_gp" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="r6" style="dashed=1;endArrow=open;" edge="1" source="c_cg" target="c_gp" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

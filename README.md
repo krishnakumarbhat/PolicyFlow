@@ -1,72 +1,58 @@
 # PolicyFlow
 
-PolicyFlow is a visual, node-based pipeline editor for classical ML and LLM fine-tuning.
+Visual, node-based pipeline editor for classical ML and LLM fine-tuning.
 
-## What this scaffold includes
+See full documentation in [docs/](docs/README.md).
 
-- Dense ReactFlow workspace with custom dataset, model, training, classical ML, and output nodes
-- FastAPI DAG parser with topological sorting, readable Python export, and WebSocket log streaming
-- Lightweight local execution for classical ML smoke tests plus validation/dry-run flow for heavy LLM graphs
-- Desktop packaging path using frontend static build + FastAPI + pywebview + PyInstaller
+## Quick Start
 
-## Project structure
+```bash
+# Backend
+cd backend
+pip install -r requirements-minimal.txt
+uvicorn server:app --host 0.0.0.0 --port 8001 --reload
 
-```text
-/app
+# Frontend (separate terminal)
+cd frontend
+npm install && npm run dev
+
+# Tests
+cd backend
+python -m pytest tests/test_api.py -v
+```
+
+## Project Structure
+
+```
+PolicyFlow/
+├── .gitignore
+├── README.md
 ├── backend/
-│   ├── app/
-│   │   ├── core/
-│   │   ├── engine/
-│   │   ├── schemas/
-│   │   └── services/
-│   ├── requirements-desktop.txt
-│   ├── requirements-optional.txt
-│   ├── requirements.txt
-│   └── server.py
-├── desktop/
-│   ├── launcher.py
-│   └── pyinstaller/ml_forge.spec
-├── docs/
-│   └── architecture.md
-├── frontend/
+│   ├── server.py                 ← Entry point
 │   ├── src/
-│   │   ├── components/
-│   │   ├── lib/
-│   │   └── pages/
-│   ├── .env
-│   └── vite.config.js
-├── scripts/
-│   ├── build_desktop.ps1
-│   ├── build_desktop.sh
-│   └── build_frontend.sh
-└── tests/
-    └── fixtures/
+│   │   ├── 00_app_factory.py     ← FastAPI + CORS
+│   │   ├── 01_graph_node.py      ← GraphNode schema
+│   │   ├── 02_graph_edge.py      ← GraphEdge schema
+│   │   ├── 03_graph_payload.py   ← GraphPayload aggregate
+│   │   ├── 04_node_registry.py   ← Singleton catalog
+│   │   ├── 05_websocket_manager.py ← Observer pattern
+│   │   ├── 06_graph_parser.py    ← Kahn's O(V+E) DAG sort
+│   │   ├── 07_code_generator.py  ← Factory pattern codegen
+│   │   ├── 08_execution_engine.py ← Strategy pattern
+│   │   └── 09_routes.py          ← Route factory
+│   └── tests/
+├── frontend/                      ← React 19 + Vite
+├── desktop/                       ← PyInstaller + pywebview
+├── docs/                          ← HLD, LLD, UML, flow (.drawio)
+└── scripts/                       ← Build automation
 ```
 
-## Frontend
+## Design Patterns
 
-- React 19 + Vite
-- TailwindCSS
-- ReactFlow via `@xyflow/react`
-- Dense node-lab layout with palette, canvas, inspector, logs, and metrics
+| Pattern | Class | Purpose |
+|---|---|---|
+| Singleton | `NodeRegistry` | Catalog built once, shared everywhere |
+| Observer | `WebSocketManager` | Broadcast events to subscribed clients |
+| Factory | `CodeGenerator` | Per-node-type code rendering dispatch |
+| Strategy | `ExecutionEngine` | Classical vs LLM execution backends |
 
-## Backend
-
-- FastAPI
-- WebSocket event stream at `/api/ws/{client_id}`
-- DAG validation at `/api/graphs/validate`
-- Code export at `/api/export`
-- Execution trigger at `/api/run`
-
-## Packaging
-
-```bash
-bash /app/scripts/build_frontend.sh
-bash /app/scripts/build_desktop.sh
-```
-
-Install optional heavy ML libraries only when you want full local training support:
-
-```bash
-pip install -r /app/backend/requirements-optional.txt
-```
