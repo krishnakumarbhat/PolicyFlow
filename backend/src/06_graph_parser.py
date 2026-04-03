@@ -1,10 +1,23 @@
+"""06_graph_parser.py — Single Responsibility: DAG topological sort via Kahn's algorithm.
+
+Why: Parsing the graph into execution order is the backbone of the pipeline.
+Kahn's algorithm runs in O(V + E) time and O(V) space — optimal for DAG
+linearisation with cycle detection.
+"""
+
 from collections import defaultdict, deque
 
-from app.schemas.graph import GraphPayload
+from src import load_module
+
+_m03 = load_module("03_graph_payload")
+GraphPayload = _m03.GraphPayload
 
 
 class GraphParser:
+    """Parses a visual graph payload into a topologically sorted execution plan."""
+
     def topological_sort(self, payload: GraphPayload) -> list:
+        """Kahn's algorithm — O(V + E). Raises ValueError on cycles."""
         node_map = {node.id: node for node in payload.nodes}
         indegree: dict[str, int] = {node.id: 0 for node in payload.nodes}
         adjacency: dict[str, list[str]] = defaultdict(list)
@@ -15,13 +28,12 @@ class GraphParser:
             adjacency[edge.source].append(edge.target)
             indegree[edge.target] += 1
 
-        queue = deque([node_id for node_id, degree in indegree.items() if degree == 0])
+        queue = deque(nid for nid, deg in indegree.items() if deg == 0)
         execution_order: list = []
 
         while queue:
             node_id = queue.popleft()
             execution_order.append(node_map[node_id])
-
             for neighbor in adjacency[node_id]:
                 indegree[neighbor] -= 1
                 if indegree[neighbor] == 0:
@@ -33,6 +45,7 @@ class GraphParser:
         return execution_order
 
     def describe_execution(self, payload: GraphPayload) -> list[dict]:
+        """Return labelled execution order with upstream dependency info."""
         execution_order = self.topological_sort(payload)
         upstream_map: dict[str, list[str]] = defaultdict(list)
 
